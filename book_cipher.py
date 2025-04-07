@@ -1,4 +1,7 @@
 #GLOBAL VARIABLES
+import json
+import os
+
 HOW_MANY_BOOK = 3
 LINE = 128
 PAGE = 64
@@ -13,9 +16,8 @@ def clean_line(line):
 
 def process_books(*paths):
     for path in paths:
-        print(path)#scaffold
         read_book(path)
-        print(len(pages), len(pages[1]))#scaffold
+        print(pages[len(pages)])
 
 def read_book(file_path):
     global char_window
@@ -55,4 +57,35 @@ def add_page():
     line_window.clear()
     line_number = 0
 
+def generate_code_book():
+    global pages
+    code_book = {}
+    for page, lines in pages.items():
+        for num, line in lines.items():
+            for pos, char in enumerate(line):
+                code_book.setdefault(char, []).append(f'{page}-{num}-{pos}')
+    return code_book
+
+def save(file_path, book):
+    with open(file_path, 'w') as fp:
+        #json.dump(book, fp, indent=4)
+        json.dump(book, fp)
+
+def load(file_path, *key_books, reverse=False):
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as fp:
+            return json.load(fp)
+    else:
+        process_books(*key_books)
+        if reverse:
+            save(file_path, pages)
+            return pages
+        else:
+            code_book = generate_code_book()
+            save(file_path, code_book)
+            return code_book
+
 process_books('./books/huck_finn.txt', './books/mysterious.txt', './books/outlaw.txt')
+cb = generate_code_book()
+print(cb['t'])
+save('./code_books/book1.json', cb)
