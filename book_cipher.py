@@ -84,8 +84,10 @@ def load(file_path, *key_books, reverse=False):
             code_book = generate_code_book()
             save(file_path, code_book)
             return code_book
-
+'''
 process_books('./books/huck_finn.txt', './books/mysterious.txt', './books/outlaw.txt')
 cb = generate_code_book()
 print(cb['t'])
 save('./code_books/book1.json', cb)
+'''
+cb = load('./code_books/book1.json')
