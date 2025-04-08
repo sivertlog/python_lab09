@@ -1,7 +1,10 @@
-#GLOBAL VARIABLES
 import json
 import os
+import re
+import sys
+from random import randint
 
+#GLOBAL VARIABLES
 HOW_MANY_BOOK = 3
 LINE = 128
 PAGE = 64
@@ -84,10 +87,53 @@ def load(file_path, *key_books, reverse=False):
             code_book = generate_code_book()
             save(file_path, code_book)
             return code_book
-'''
-process_books('./books/huck_finn.txt', './books/mysterious.txt', './books/outlaw.txt')
-cb = generate_code_book()
-print(cb['t'])
-save('./code_books/book1.json', cb)
-'''
-cb = load('./code_books/book1.json')
+
+def encrypt(code_book, message):
+    cipher_text = []
+    for char in message:
+        index = randint(0, len(code_book[char]) -1)
+        cipher_text.append(code_book[char].pop(index))
+    return '-'.join(cipher_text)
+
+def decrypt(rev_code_book, ciphertext):
+    plaintext = []
+    for cc in re.findall(r'\d+-\d+-\d+', ciphertext):
+        page, line, char = cc.split('-')
+        plaintext.append(
+            rev_code_book[page][line][int(char)])
+    return ''.join(plaintext)
+
+def main_menu():
+    print("""1). Encrypt
+2). Decrypt
+3). Quit
+""");
+    return int(input("Make a selection [1,2,3]: "))
+
+
+def main():
+    key_books = ('./books/huck_finn.txt', './books/mysterious.txt', './books/outlaw.txt')
+    code_book_path = 'code_books/dmdwp.txt'
+    rev_code_book_path = 'code_books/dmdwp_r.txt'
+    while True:
+        try:
+            choice = main_menu()
+            match (choice):
+                case 1:
+                    code_book = load(code_book_path, *key_books)
+                    message = input("Please enter your secret message: ")
+                    print(encrypt(code_book, message))
+                    continue;
+                case 2:
+                    rev_code_book = load(rev_code_book_path, *key_books, reverse=True)
+                    message = input("Please enter your cipher text: ")
+                    print(decrypt(rev_code_book, message))
+                    continue;
+                case 3:
+                    sys.exit(0)
+        except ValueError as ve:
+            print("Improper selection.")
+
+
+if __name__ == '__main__':
+    main()
